@@ -7,36 +7,51 @@ const getUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain/next';
 const postUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain';
 
 // Const
-const user = 'Leon de Klerk';
-const nonce = null;
+const user = 'Leon';
 
-// Excecute
-mod10sha('dit is 1011111111')
+/////////
 
+//getNextBlock()
 
 // Functions
 
 	// Mine a block
-	function mineBlock(){
-		//mine block
-	}
 
 	// Get next block
 	function getNextBlock() {
 		axios.get(getUrl)
-		.then(function (block) {
-			return block
+		.then((block) => {
+			if (block.data.open == true) {
+				let lastBlockString = block.data.blockchain.hash + block.data.blockchain.data[0].from + block.data.blockchain.data[0].to + block.data.blockchain.data[0].amount + block.data.blockchain.data[0].timestamp + block.data.blockchain.timestamp + block.data.blockchain.nonce
+				console.log(lastBlockString)
+				let hashOfLastBlock = to265(mod10sha(lastBlockString));
+				console.log(hashOfLastBlock)
+				let newBlockString = hashOfLastBlock + block.data.transactions[0].from + block.data.transactions[0].to + block.data.transactions[0].amount + block.data.transactions[0].timestamp + block.data.timestamp
+				console.log(newBlockString)
+				let newBlockStringWithNonce = ''
+				for( let nonce = 0; 1 == 1; nonce++){
+					newBlockStringWithNonce = newBlockString + nonce
+					newBlockStringWithNonce = to265(mod10sha(newBlockStringWithNonce));
+					let isThisAZero = newBlockStringWithNonce.slice(0,4)
+					if (isThisAZero == '0000'){
+						postNonce(nonce)
+					}
+				}
+			}else{
+			console.log('Blockchain is closed for ' + (block.data.countdown / 1000) + 's')
+			setTimeout(() => getNextBlock(), (block.data.countdown / 10))
+			}
 		})
 		.catch(function (error) {
-			console.log(error)
+			return console.log(error)
 		});
 	}
 	
 	// Post nonce to blockchain
-	function postNonce() {
+	function postNonce(n) {
 		axios.post(postUrl, {
 			user: user,
-			nonce: nonce
+			nonce: n
 		})
 		.then(function (response) {
 			console.log(response.data.message)
@@ -76,25 +91,31 @@ mod10sha('dit is 1011111111')
 		for (let i = 0; i < howMuch; i++) {
 			splitArray.push(i)
 		}
-
+		
 		let multipleOfTenArray = []
         while (splitArray.length) {
 			multipleOfTenArray.push(splitArray.splice(0, 10));
 		}
 
-		let lastArray = []
-		for (let i = 0; i < (multipleOfTenArray.length - 1); i++){
-			for (let o = 0; o < 10; o++){
-				lastArray.push(multipleOfTenArray[i][o] + multipleOfTenArray[(i+1)][o])
+		function mod10(collection, summary) {
+			if (collection.length === 0) {
+				return summary
 			}
+			return mod10(collection, addition(summary, ...collection.splice(0, 1)))
 		}
-
-		let lastString = lastArray.toString().replace(/,/g, '');
 		
-
-
-		console.log('Multiple of 10 array:')
-		console.log(multipleOfTenArray)
-		console.log(lastString)
-
+		function addition(arr1, arr2) {
+			let arr = [];
+		
+			for (let i = 0; i < 10; i++) {
+				arr.push((arr1[i] + arr2[i]) % 10)
+			}
+			return arr;
+		}
+		let lastArray = mod10(multipleOfTenArray, ...multipleOfTenArray.splice(0, 1));
+		let lastString = ''
+		for(let i = 0; i < lastArray.length; i++){
+			lastString+=lastArray[i]
+		}
+		return lastString
 	}
