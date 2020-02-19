@@ -13,6 +13,8 @@ let t0;
 let t1;
 let t2;
 let t3;
+let t4;
+let t5;
 /////////
 
 getBlockAndStartMining();
@@ -30,9 +32,16 @@ getBlockAndStartMining();
 				let hashOfLastBlock = createLastBlockHash(lastBlockString);
 				let newBlockString = createNewBlockString(hashOfLastBlock, blockInfo);
 				let noncefound = findNonceWithNumbers(newBlockString);
-				postNonce(noncefound);
+				//postNonce(noncefound);
+				console.log('nonce: ' + noncefound);
+				t1 = performance.now();
+				console.log("Checking the blockchain took: " + (t1 - t0) + " milliseconds.");
+				console.log("Counting for the nonce: " + (t5 - t4) + " milliseconds.");
+				getBlockAndStartMining();
 			}else{
 				console.log('Blockchain is closed for ' + (blockInfo.countdown / 1000) + 's');
+				t1 = performance.now();
+				console.log("Checking the blockchain took: " + (t1 - t0) + " milliseconds.");
 				setTimeout(() => getBlockAndStartMining(), (blockInfo.countdown / 10));
 			}
 		})
@@ -55,12 +64,26 @@ getBlockAndStartMining();
 	}
 
 	function findNonceWithNumbers(newBlockString){
+		t4 = performance.now()
 		for( let nonce = 0; 1 == 1; nonce++){
 			let newBlockStringWithNonce = to265(mod10sha(newBlockString + nonce));
 			if(isThisAZero(newBlockStringWithNonce, nonce)){
+				t5 = performance.now()
 				return nonce;
 			}
 		};
+
+		// t4 = performance.now()
+		// let nonce = 0;
+		// let hashedNewBlock = '12345';
+		
+		// while (hashedNewBlock.slice(0,4) !== '0000') {
+		// 	nonce++
+		// 	hashedNewBlock = to265(mod10sha(newBlockString + nonce));
+			
+		// }
+		// t5 = performance.now()
+		// return nonce
 	}
 
 	function to265(data){
@@ -70,8 +93,6 @@ getBlockAndStartMining();
 	function isThisAZero(hash, nonce){
 		if (hash.slice(0,4) == '0000'){
 			return nonce;
-		}else{
-			false;
 		}
 	}
 
@@ -125,9 +146,7 @@ getBlockAndStartMining();
 			})
 		};
 
-		
-		let counted = splitArray.length;
-		let howMuch = 10 - (counted%10);
+		let howMuch = 10 - (splitArray.length%10);
 		for (let i = 0; i < howMuch; i++) {
 			splitArray.push(i);
 		}
