@@ -1,65 +1,98 @@
 // Use
 const axios = require('axios');
 const crypto = require('crypto');
+const { performance } = require('perf_hooks');
 
 // Settings
 const getUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain/next';
 const postUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain';
 
 // Const
-const user = 'Leon';
+const user = 'Leon 0955849';
 
 /////////
-
-//getNextBlock()
+let t0 = performance.now();
+getBlockAndStartMining()
 
 // Functions
 
-	// Mine a block
-
-	// Get next block
-	function getNextBlock() {
+	// Axios Get Request
+	function getBlockAndStartMining(){
 		axios.get(getUrl)
-		.then((block) => {
-			if (block.data.open == true) {
-				let lastBlockString = block.data.blockchain.hash + block.data.blockchain.data[0].from + block.data.blockchain.data[0].to + block.data.blockchain.data[0].amount + block.data.blockchain.data[0].timestamp + block.data.blockchain.timestamp + block.data.blockchain.nonce
-				console.log(lastBlockString)
-				let hashOfLastBlock = to265(mod10sha(lastBlockString));
-				console.log(hashOfLastBlock)
-				let newBlockString = hashOfLastBlock + block.data.transactions[0].from + block.data.transactions[0].to + block.data.transactions[0].amount + block.data.transactions[0].timestamp + block.data.timestamp
-				console.log(newBlockString)
-				let newBlockStringWithNonce = ''
-				for( let nonce = 0; 1 == 1; nonce++){
-					newBlockStringWithNonce = newBlockString + nonce
-					newBlockStringWithNonce = to265(mod10sha(newBlockStringWithNonce));
-					let isThisAZero = newBlockStringWithNonce.slice(0,4)
-					if (isThisAZero == '0000'){
-						postNonce(nonce)
-					}
-				}
+		.then(r => {
+			let blockInfo = r.data
+			if (blockInfo.open === true){
+				let lastBlockString = createLastBlockString(blockInfo)
+				let hashOfLastBlock = createLastBlockHash(lastBlockString)
+				let newBlockString = createNewBlockString(hashOfLastBlock, blockInfo)
+				let noncefound = findNonceWithNumbers(newBlockString)
+				postNonce(noncefound)
 			}else{
-			console.log('Blockchain is closed for ' + (block.data.countdown / 1000) + 's')
-			setTimeout(() => getNextBlock(), (block.data.countdown / 10))
+				console.log('Blockchain is closed for ' + (blockInfo.countdown / 1000) + 's')
+				setTimeout(() => getBlockAndStartMining(), (blockInfo.countdown / 10))
 			}
 		})
-		.catch(function (error) {
-			return console.log(error)
+		.catch(e => {
+			 console.log(e)
 		});
 	}
 	
-	// Post nonce to blockchain
+	// Functions
+	function createLastBlockString(blockInfo){
+		return blockInfo.blockchain.hash + blockInfo.blockchain.data[0].from + blockInfo.blockchain.data[0].to + blockInfo.blockchain.data[0].amount + blockInfo.blockchain.data[0].timestamp + blockInfo.blockchain.timestamp + blockInfo.blockchain.nonce
+	}
+
+	function createLastBlockHash(lastBlockString){
+		return to265(mod10sha(lastBlockString))
+	}
+
+	function createNewBlockString(hashOfLastBlock, blockInfo){
+		return hashOfLastBlock + blockInfo.transactions[0].from + blockInfo.transactions[0].to + blockInfo.transactions[0].amount + blockInfo.transactions[0].timestamp + blockInfo.timestamp
+	}
+
+	function findNonceWithNumbers(newBlockString){
+		for( let nonce = 0; 1 == 1; nonce++){
+			let newBlockStringWithNonce = to265(mod10sha(newBlockString + nonce));
+			if(isThisAZero(newBlockStringWithNonce, nonce)){
+				return nonce
+			}
+		}
+	}
+
+	function isThisAZero(hash, nonce){
+		if (hash.slice(0,4) == '0000'){
+			return nonce
+		}else{
+			false
+		}
+	}
+
 	function postNonce(n) {
 		axios.post(postUrl, {
 			user: user,
 			nonce: n
 		})
 		.then(function (response) {
-			console.log(response.data.message)
+			if(response.data.message === 'blockchain accepted, user awarded'){
+				console.log('Succesfully mined the block!')
+				console.log('Used nonce: ' + n)
+				let t1 = performance.now();
+				console.log("Finding the nonce took: " + (t1 - t0) + " milliseconds.");
+				getBlockAndStartMining()
+			}else{
+				console.log(n + ' is (probably) not the right nonce! See message below')
+				console.log(response.data.message)
+				var t1 = performance.now();
+				console.log("Finding the nonce took: " + (t1 - t0) + " milliseconds.");
+				getBlockAndStartMining()
+			}
 		})
 		.catch(function (e) {
 			console.log(e)
 		});
 	}
+	
+	
 
 	// Convert data to sha265
 	function to265(data){
