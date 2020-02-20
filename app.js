@@ -2,8 +2,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const { performance } = require('perf_hooks');
-const { GPU } = require('gpu.js');
-const gpu = new GPU();
 
 // Settings
 const getUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain/next';
@@ -15,16 +13,8 @@ const text2 = '&name=Leon%200955849';
 // Timers
 let t2;
 let t3;
-/////////
-
-const matMult = gpu.createKernel(function(a, b) {
-    var sum = 0;
-    for (var i = 0; i < 512; i++) {
-        sum += a[this.thread.y][i] * b[i][this.thread.x];
-    }
-    return sum;
-}).setOutput([512, 512]);
-
+//
+getBlockAndStartMining();
 // Functions
 
 	// Axios Get Request
