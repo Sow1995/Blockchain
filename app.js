@@ -1,20 +1,14 @@
 // Use
 const axios = require('axios');
 const crypto = require('crypto');
-const { performance } = require('perf_hooks');
 
 // Settings
 const getUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain/next';
 const postUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain';
 const user = 'Leon 0955849';
-const text = 'https://coins.cmgt.dev?';
-const text2 = '&name=Leon%200955849';
 
-// Timers
-let t2;
-let t3;
-//
 getBlockAndStartMining();
+
 // Functions
 
 	// Axios Get Request
@@ -23,15 +17,11 @@ getBlockAndStartMining();
 		.then(r => {
 			let blockInfo = r.data;
 			if (blockInfo.open === true){
-				t2 = performance.now();
 				let lastBlockString = createLastBlockString(blockInfo);
 				let hashOfLastBlock = createLastBlockHash(lastBlockString);
 				let newBlockString = createNewBlockString(hashOfLastBlock, blockInfo);
 				let noncefound = findNonceWithNumbers(newBlockString);
 				postNonce(noncefound);
-				console.log('The nonce used is: ' + noncefound);
-				t3 = performance.now();
-				console.log("Mining for the nonce took: " + Math.round(t3 - t2) + " milliseconds.");
 				getBlockAndStartMining();
 			}else{
 				console.log('Blockchain is closed for ' + Math.round(blockInfo.countdown / 1000) + 's');
@@ -63,40 +53,31 @@ getBlockAndStartMining();
 	}
 	
 	// Functions
-	function createLastBlockString(blockInfo){
-		return blockInfo.blockchain.hash + blockInfo.blockchain.data[0].from + blockInfo.blockchain.data[0].to + blockInfo.blockchain.data[0].amount + blockInfo.blockchain.data[0].timestamp + blockInfo.blockchain.timestamp + blockInfo.blockchain.nonce;
+	function createLastBlockString(b){
+		return b.blockchain.hash + b.blockchain.data[0].from + b.blockchain.data[0].to + b.blockchain.data[0].amount + b.blockchain.data[0].timestamp + b.blockchain.timestamp + b.blockchain.nonce;
 	}
 
 	function createLastBlockHash(lastBlockString){
 		return to265(mod10sha(lastBlockString));
 	}
 
-	function createNewBlockString(hashOfLastBlock, blockInfo){
-		return hashOfLastBlock + blockInfo.transactions[0].from + blockInfo.transactions[0].to + blockInfo.transactions[0].amount + blockInfo.transactions[0].timestamp + blockInfo.timestamp;
+	function createNewBlockString(h, b){
+		return h + b.transactions[0].from + b.transactions[0].to + b.transactions[0].amount + b.transactions[0].timestamp + b.timestamp;
 	}
 
-	function findNonceWithNumbers(newBlockString){
-		for( let i = 1; 1 == 1; i++){
-			nonce = text + i + text2;
-			let newBlockStringWithNonce = to265(mod10sha(newBlockString + nonce));
-			if(isThisAZero(newBlockStringWithNonce, nonce)){
+	function findNonceWithNumbers(d){
+		for( let i = 1500; 1 == 1; i++){
+			nonce = 'https://coins.cmgt.dev?v=kMlLz7stjwc?' + i + '&name=Leon%200955849';
+			//nn = 'https://www.youtube.com/watch?v=kMlLz7stjwc?' + i + '????CHECK-OUT->>>>>>>>>https://COINS.CMGT.DEV' ; 
+			let w = to265(mod10sha(d + nonce));
+			if(isThisAZero(w, nonce)){
 				return nonce;
 			}
 		};
-
-		// let nonce = 0;
-		// let hashedNewBlock = '12345';
-		
-		// while (hashedNewBlock.slice(0,4) !== '0000') {
-		// 	nonce++
-		// 	hashedNewBlock = to265(mod10sha(newBlockString + nonce));
-			
-		// }
-		// return nonce
 	}
 
-	function to265(data){
-		return crypto.createHash('sha256').update(data).digest('hex');
+	function to265(d){
+		return crypto.createHash('sha256').update(d).digest('hex');
 	}
 
 	function isThisAZero(hash, nonce){
