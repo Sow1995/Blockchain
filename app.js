@@ -55,6 +55,7 @@ function createLastBlockString(b){
 
 function createLastBlockHash(lastBlockString){
 	return to265(mod10sha(lastBlockString));
+	
 }
 
 function createNewBlockString(h, b){
@@ -85,7 +86,7 @@ function isThisAZero(hash, nonce){
 
 
 // Convert data to sha265
-function mod10sha(data){
+const mod10sha = (data) => {
 	data = data.replace(/\s+/g, '');
 
 	let numberArray = []
@@ -137,3 +138,5 @@ function mod10sha(data){
 	}
 	return lastString;
 }
+
+module.exports = mod10sha;
