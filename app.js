@@ -1,6 +1,7 @@
 // Use
 const axios = require('axios');
 const crypto = require('crypto');
+const { exit } = require('process');
 
 // Settings
 const getUrl = 'https://programmeren9.cmgt.hr.nl:8000/api/blockchain/next';
@@ -63,9 +64,9 @@ function createNewBlockString(h, b){
 }
 
 function findNonceWithNumbers(d){
-	for( let i = 0; 1 == 1; i++){
-		nonce = 'https://coins.cmgt.dev?v=kMlLz7stjwc?' + i + '&name=Leon%200955849';
-		//nn = 'https://www.youtube.com/watch?v=kMlLz7stjwc?' + i + '????CHECK-OUT->>>>>>>>>https://COINS.CMGT.DEV' ; 
+	for( let i = 1500; 1 == 1; i++){
+		nonce = 'https://blockchain.cmgt.dev?' + i + '&name=Leon%200955849';
+		//nonce = 'https://www.youtube.com/watch?v=kMlLz7stjwc?' + i + '????CHECK-OUT->>>>>>>>>https://BLOCKCHAIN.CMGT.DEV' ; 
 		let w = to265(mod10sha(d + nonce));
 		if(isThisAZero(w, nonce)){
 			return nonce;
@@ -115,22 +116,6 @@ const mod10sha = (data) => {
 		multipleOfTenArray.push(splitArray.splice(0, 10));
 	}
 
-	const mod10alg = (arrayOne, arrayTwo) => { 
-		if (arrayOne.length === 0){
-			return arrayTwo;
-		} 
-		return mod10alg(arrayOne, addition(arrayTwo, ...arrayOne.splice(0, 1)))
-	};
-
-	function addition(arr1, arr2) {
-		let arr = [];
-	
-		for (let i = 0; i < 10; i++) {
-			arr.push((arr1[i] + arr2[i]) % 10);
-		}
-		return arr;
-	}
-	
 	let lastArray = mod10alg(multipleOfTenArray, ...multipleOfTenArray.splice(0, 1));
 	let lastString = '';
 	for(let i = 0; i < lastArray.length; i++){
@@ -139,4 +124,23 @@ const mod10sha = (data) => {
 	return lastString;
 }
 
-module.exports = mod10sha;
+const mod10alg = (arrayOne, arrayTwo) => { 
+	if (arrayOne.length === 0){
+		return arrayTwo;
+	} 
+	return mod10alg(arrayOne, addition(arrayTwo, ...arrayOne.splice(0, 1)))
+};
+
+function addition(arr1, arr2) {
+	let arr = [];
+
+	for (let i = 0; i < 10; i++) {
+		arr.push((arr1[i] + arr2[i]) % 10);
+	}
+	return arr;
+}
+
+module.exports = {
+	mod10sha,
+	mod10alg
+ }
